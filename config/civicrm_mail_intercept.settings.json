@@ -1,0 +1,5 @@
+{
+    "_config_name": "civicrm_mail_intercept.settings",
+    "civicrm_mail_intercept_disable": 0,
+    "civicrm_mail_intercept_handler": 0
+}

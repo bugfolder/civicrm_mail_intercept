@@ -1,0 +1,20 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the civicrm_mail_intercept module.
+ *
+ */
+
+
+/**
+ * Convert CiviCRM Mail Intercept settings to config.
+ */
+function civicrm_mail_intercept_update_1000() {
+  $config = config('civicrm_mail_intercept.settings');
+  $config->set('civicrm_mail_intercept_disable', update_variable_get('civicrm_mail_intercept_disable', 0));
+  $config->set('civicrm_mail_intercept_handler', update_variable_get('civicrm_mail_intercept_handler', 0));
+  $config->save();
+
+  update_variable_del('civicrm_mail_intercept_disable');
+  update_variable_del('civicrm_mail_intercept_handler');
+}

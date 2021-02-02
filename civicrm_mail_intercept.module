@@ -1,0 +1,121 @@
+<?php
+/**
+ * @file
+ * CiviCRM Mail Intercept module file
+ *
+ * Intercepts CiviCRM mail requests and writes them to the window.
+ * @see http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterMailer
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function civicrm_mail_intercept_menu() {
+  $items['admin/config/devel/civicrm_mail_intercept'] = array(
+    'title' => 'CiviCRM Mail Intercept',
+    'description' => 'Settings for intercepting CiviCRM emails',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('civicrm_mail_intercept_settings_form'),
+    'file' => 'civicrm_mail_intercept.admin.inc',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+
+/**
+ * Implements hook_config_info().
+ */
+function civicrm_mail_intercept_config_info() {
+  $prefixes['civicrm_mail_intercept.settings'] = array(
+    'label' => t('Module name settings'),
+    'group' => t('Configuration'),
+  );
+}
+
+
+/**
+ * Implements hook_civicrm_alterMailer().
+ *
+ * Replace the normal mailer with our custom mailer
+ */
+function civicrm_mail_intercept_civicrm_alterMailer(&$mailer, $driver, $params) {
+  $disable_mail = config_get('civicrm_mail_intercept.settings', 'civicrm_mail_intercept_disable');
+  if ($disable_mail) {
+    $mailer = new CiviInterceptMailMailer();
+  }
+}
+
+
+/**
+ * Outbound mailer that intercepts mail and, optionally, displays or records
+ * mail messages.
+ *
+ * For better examples, see PEAR Mail.
+ *
+ * @see Mail_null
+ * @see Mail_mock
+ * @see Mail_sendmail
+ * @see Mail_smtp
+ */
+class CiviInterceptMailMailer {
+  /**
+   * Instead of sending the email, display or record it.
+   */
+  function send($recipients, $headers, $body) {
+    $message = array(
+      'headers' => $headers,
+      'recipients' => $recipients,
+      'body' => $body,
+    );
+    $handler = config_get('civicrm_mail_intercept.settings', 'civicrm_mail_intercept_handler');
+    switch ($handler) {
+
+      case 1: // Write to screen
+        if (module_exists('devel')) {
+          dpm($message, 'CiviCRM email');
+        }
+        else {
+          backdrop_set_message(t("CiviCRM email:<ul><li>from => @from</li><li>to => @to</li><li>subject => @subject</li></ul>@body",
+            array(
+            '@from' => $headers['From'],
+            '@to' => $recipients,
+            '@subject' => $headers['Subject'],
+            '@body' => $body,
+          )));
+        }
+        break;
+
+      case 2: // Write to a /tmp file
+        $tmp_file = '/tmp/civicrm_mail_intercept-' . date('Ymd-H-i') . '.txt';
+        ob_start();
+        print_r($message);
+        $content .= ob_get_clean() . "\n";
+        file_put_contents($tmp_file, $content, FILE_APPEND);
+        break;
+
+      default: // case 0, no action
+    }
+  }
+}
+
+
+/**
+ * Implements hook_civicrm_postEmailSend().
+ *
+ * Follow up on activity emails (but not bulk mailings).
+ * @see https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_postEmailSend/
+ */
+function civicrm_mail_intercept_civicrm_postEmailSend(&$params) { }
+
+
+/**
+ * Implements hook_autoload_info().
+ */
+function civicrm_mail_intercept_autoload_info() {
+  return array(
+    'CiviInterceptMailMailer' => 'civicrm_mail_intercept.module',
+  );
+}
