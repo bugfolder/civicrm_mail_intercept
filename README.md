@@ -3,8 +3,9 @@ CiviCRM Mail Intercept
 
 This module allows the interception of CiviCRM-attempted emails in development,
 with the option to display the contents in the current page or to dump them to
-a file in the `/tmp` directory (useful for things done during cron, which is
-executed via a shell script).
+a file in the `/tmp` directory.
+
+Note, however, that this only applies to emails generated via user interaction with the site, not during CiviCRM cron calls, because CiviCRM's cron processor doesn't do a full bootstrap of Backdrop.
 
 If we're writing to the screen, then the module checks to see if the devel
 module is enabled; if it is, we use `dpm()` to format the message on the screen.
