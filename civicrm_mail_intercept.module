@@ -12,14 +12,13 @@
  * Implements hook_menu().
  */
 function civicrm_mail_intercept_menu() {
-  $items['admin/config/devel/civicrm_mail_intercept'] = array(
-    'title' => 'CiviCRM Mail Intercept',
-    'description' => 'Settings for intercepting CiviCRM emails',
+  $items['admin/config/development/civicrm_mail_intercept'] = array(
+    'title' => 'CiviCRM mail intercept',
+    'description' => 'Settings for intercepting CiviCRM emails.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('civicrm_mail_intercept_settings_form'),
     'file' => 'civicrm_mail_intercept.admin.inc',
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK,
   );
   return $items;
 }
@@ -30,7 +29,7 @@ function civicrm_mail_intercept_menu() {
  */
 function civicrm_mail_intercept_config_info() {
   $prefixes['civicrm_mail_intercept.settings'] = array(
-    'label' => t('Module name settings'),
+    'label' => t('CiviCRM Mail Intercept settings'),
     'group' => t('Configuration'),
   );
 }
@@ -72,7 +71,6 @@ class CiviInterceptMailMailer {
     );
     $handler = config_get('civicrm_mail_intercept.settings', 'civicrm_mail_intercept_handler');
     switch ($handler) {
-
       case 1: // Write to screen
         if (module_exists('devel')) {
           dpm($message, 'CiviCRM email');

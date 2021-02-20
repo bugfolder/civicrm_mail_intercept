@@ -1,7 +1,8 @@
 name = CiviCRM Mail Intercept
 description = Intercepts CiviCRM mail and displays it on screen or written to a file.
 dependencies[] = civicrm
-package = CiviCRM - OrigamiUSA
+package = CiviCRM
 backdrop = 1.x
 type = module
-version = 1.x-1.0
+
+configure = admin/config/devel/civicrm_mail_intercept
